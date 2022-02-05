@@ -3,8 +3,10 @@ import os
 import clientstream
 
 def establish_UDP_connection(port, ip):
-    print("established")
-    clientstream.f()
+    print("established.")
+    print(ip)
+    print(port)
+    clientstream.get_stream(port, ip)
 
 def on_message(message):
     message = message.split()
