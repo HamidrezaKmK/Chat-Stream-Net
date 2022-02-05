@@ -9,10 +9,10 @@ def establish_UDP_connection(port, ip):
     clientstream.get_stream(port, ip)
 
 def on_message(message):
-    message = message.split()
-    if message[0] == '[PORTREQ]':
-        port = int(message[1])
-        ip = message[2]
+    message_splitted = message.split()
+    if message_splitted[0] == '[PORTREQ]':
+        port = int(message_splitted[1])
+        ip = message_splitted[2]
         establish_UDP_connection(port, ip)
     
     # In ja momkene bekhaym if bezanim age folan chiz bood udp va cv2 va ina ro
