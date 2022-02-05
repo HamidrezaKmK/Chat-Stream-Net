@@ -20,12 +20,15 @@ def check_firewall(port):
 
 def connect_to(port, id, callback):
     if not check_firewall(port):
-        callback("packet dropped due firewall rules\n")
+        callback(f"packet dropped due firewall rules\n{main_menu}")
         return
     def on_exit():
         clients.pop(id)
         callback(main_menu)
-    return build_client(callback, on_exit, port)
+    try:
+        return build_client(callback, on_exit, port)
+    except:
+        callback(f"failed to connect to the port\n{main_menu}")
 
 def handler(message, id, callback):
     global firewall_mode
@@ -51,6 +54,16 @@ def handler(message, id, callback):
             return
         if message == "choghondar":
             clients[id] = connect_to(10003, id, callback)
+            return
+        if message[0:12] == "shalgham via":
+            clients[id] = connect_to(int(message[12:]), id, callback)
+            if clients[id] != None:
+                clients[id]("10002")
+            return
+        if message[0:13] == "choghondar via":
+            clients[id] = connect_to(int(message[13:]), id, callback)
+            if clients[id] != None:
+                clients[id]("10003")
             return
         if message == "back":
             clients.pop(id)
