@@ -36,7 +36,6 @@ class User:
     # def toJson(self):
     #     return json.dumps(self, default=lambda o: o.__dict__)
 
-
     def set_state(self, state):
         self.current_state = state
 
@@ -58,13 +57,16 @@ class User:
             for message in message_list:
                 if message.sender != self.username and not message.read_unread:
                     cnt += 1
-            ch = name
+            ch = '- {}'.format(name)
             if cnt > 0:
-                ch = '{} ({})'.format(name, cnt)
+                ch = '- {} ({})'.format(name, cnt)
             inbox_msg.append(ch)
-        ret = 'inbox empty!\nUse -send-direct to send a new message\n' if len(inbox_msg) == 0 else '\n'.join(inbox_msg) + '\n'
+        ret = 'inbox empty!\nUse -send-direct to send a new message\n' if len(inbox_msg) == 0 else '\n'.join(
+            inbox_msg) + '\n'
         ret = '---------------------------\n-----------inbox-----------\n---------------------------\n' + ret
+        ret += "Enter \"logout\" to log out!\n---------------------------\n"
         return ret
+
     @staticmethod
     def check_username_redundant(username):
         return username in User.all_user_pass.keys()
@@ -98,6 +100,11 @@ def handle_user_message(message, user, callback):
                     user.enter_chat(username)
             else:
                 callback("Username non-existant in server!")
+        elif message == 'logout':
+            user.set_state('offline')
+            logged_in_clients.pop(user.current_session)
+            user.current_session = -1
+            callback(main_menu)
         else:
             username = message
             if username in user.inbox.keys():
@@ -153,6 +160,7 @@ def handler(message, id, callback):
             password = message.strip()
             username = signing_up_clients[id][14:]
             user = User(username, password, id)
+            signing_up_clients.pop(id)
             logged_in_clients[id] = user
             callback(logged_in_clients[id].inbox_print())
             logged_in_clients[id].set_state('online-inbox')
@@ -172,6 +180,7 @@ def handler(message, id, callback):
             print(User.all_user_pass[username])
             print(type(User.all_user_pass[username]))
             if User.all_user_pass[username].password == password_input:
+                logging_in_clients.pop(id)
                 logged_in_clients[id] = User.all_user_pass[username]
                 logged_in_clients[id].set_session(id)
                 callback(logged_in_clients[id].inbox_print())
@@ -194,6 +203,7 @@ def handler(message, id, callback):
         if message == "3":
             callback("$special_exit")
             return
+
 
 print("Loading chatroom server files...")
 try:
