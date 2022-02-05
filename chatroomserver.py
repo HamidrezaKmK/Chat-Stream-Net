@@ -98,12 +98,12 @@ def handle_user_message(message, user, callback):
             username = message.split()[-1]
             if User.check_username_redundant(username):
                 if username == user.username:
-                    callback("Can't send message to yourself!")
+                    callback("Can't send message to yourself!\nRe-enter: ")
                 else:
                     callback(chat_guide(username))
                     user.enter_chat(username, callback)
             else:
-                callback("Username non-existant in server!")
+                callback("Username non-existant in server! Please enter valid username: ")
         elif message == 'logout':
             user.set_state('offline')
             logged_in_clients.pop(user.current_session)
@@ -116,7 +116,7 @@ def handle_user_message(message, user, callback):
                 user.enter_chat(username, callback)
             else:
                 callback("{} is not available in your inbox!\n"
-                         "try \"-send-direct (username)\" to chat with someone with no history")
+                         "try \"-send-direct (username)\" to chat with someone with no history\n")
     elif user.current_state == 'online-direct':
         message = message.strip()
         if message == '/exit':
@@ -163,10 +163,10 @@ def handler(message, id, callback):
         if signing_up_clients[id] == 'username-req':
             username = message.strip()
             if not User.check_username_redundant(username):
-                callback("Please enter your password")
+                callback("Please enter your password: ")
                 signing_up_clients[id] = 'password-req--{}'.format(username)
             else:
-                callback("This username is already existed or invalid. Please enter another one.")
+                callback("This username is already existed or invalid. Please enter another one: ")
         elif signing_up_clients[id][:12] == 'password-req':
             password = message.strip()
             username = signing_up_clients[id][14:]
@@ -181,10 +181,10 @@ def handler(message, id, callback):
         if logging_in_clients[id] == 'username-req':
             username = message.strip()
             if User.check_username_redundant(username):
-                callback("Please enter your password")
+                callback("Please enter your password: ")
                 logging_in_clients[id] = 'password-req--{}'.format(username)
             else:
-                callback("The username does not exist! Enter another one ...")
+                callback("The username does not exist! Enter another one: ")
         elif logging_in_clients[id][:12] == 'password-req':
             password_input = message.strip()
             username = logging_in_clients[id][14:]
@@ -197,18 +197,18 @@ def handler(message, id, callback):
                 callback(logged_in_clients[id].inbox_print())
                 logged_in_clients[id].set_state('online-inbox')
             else:
-                callback("Password does not match with the username! Please re-enter ...")
+                callback("Password does not match with the username! Please re-enter: ")
         else:
             raise "Undefined state for user who is logging in."
     else:
         if message == "1":
             # Sign up
-            callback("Please enter your username:")
+            callback("Please enter your username: ")
             signing_up_clients[id] = 'username-req'
             return
         if message == "2":
             # Login
-            callback("Please enter your username:")
+            callback("Please enter your username: ")
             logging_in_clients[id] = 'username-req'
             return
         if message == "3":
