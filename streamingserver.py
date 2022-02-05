@@ -3,7 +3,7 @@ import socket, cv2, pickle,struct,imutils
 
 client_watching = []
 
-main_menu = "Welcome to choghondar\nFilmi nadarim felan\n"
+main_menu = "Welcome to choghondar\n1. Teenage Mutant Ninja Turtles\n"
 path = ""
 
 def handler(message, id, callback):
@@ -15,26 +15,22 @@ def handler(message, id, callback):
             message = int(message)
         except ValueError:
             callback("not a number!")
-        client_watching.append(id)
+        #client_watching.append(id)
         if message == 1:
             path = "TeenageMutantNinjaTurtles.mp4"
 
-        server_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
-#sock = socket.socket()
-        server_socket.bind(('', 0))
-        port = server_socket.getsockname()[1]
 
+        # Socket Create
+        server_socket = socket.socket(socket.AF_INET,socket.SOCK_STREAM)
         host_name  = socket.gethostname()
         host_ip = socket.gethostbyname(host_name)
-    
+        server_socket.bind(('', 0))
+        port = server_socket.getsockname()[1]
+        print('port:', port)
+        socket_address = (host_ip,port)
+        
         callback('[{}] {} {}'.format('PORTREQ', port, host_ip))
-
-        print('HOST IP:',host_ip)
-        socket_address = (host_ip, port)
-
-        # Socket Bind
-#server_socket.bind(socket_address)
-
+    
         # Socket Listen
         server_socket.listen(5)
         print("LISTENING AT:", socket_address)

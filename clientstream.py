@@ -8,6 +8,8 @@ def get_stream(port, ip):
     client_socket.connect((host_ip,port))
     data = b""
     payload_size = struct.calcsize("Q")
+
+    print("Here")
     
     try:
         while True:
