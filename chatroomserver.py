@@ -30,11 +30,14 @@ class User:
         User.all_user_pass[username] = self
         self.inbox = {}
         self.current_state = 'offline'
-
+        self.callback = None
         User.save_users()
 
     # def toJson(self):
     #     return json.dumps(self, default=lambda o: o.__dict__)
+
+    def send_message_to_user(self, msg):
+        self.callback(msg)
 
     def set_state(self, state):
         self.current_state = state
@@ -42,13 +45,14 @@ class User:
     def set_session(self, session):
         self.current_session = session
 
-    def enter_chat(self, username):
+    def enter_chat(self, username, callback):
         if username not in User.all_user_pass.keys():
             raise "chattee with name {} not available!".format(username)
         self.chattee = username
         self.set_state('online-direct')
         if username not in self.inbox.keys():
             self.inbox[username] = []
+        self.callback = callback
 
     def inbox_print(self):
         inbox_msg = []
@@ -97,7 +101,7 @@ def handle_user_message(message, user, callback):
                     callback("Can't send message to yourself!")
                 else:
                     callback(chat_guide(username))
-                    user.enter_chat(username)
+                    user.enter_chat(username, callback)
             else:
                 callback("Username non-existant in server!")
         elif message == 'logout':
@@ -109,7 +113,7 @@ def handle_user_message(message, user, callback):
             username = message
             if username in user.inbox.keys():
                 callback(chat_guide(username))
-                user.enter_chat(username)
+                user.enter_chat(username, callback)
             else:
                 callback("{} is not available in your inbox!\n"
                          "try \"-send-direct (username)\" to chat with someone with no history")
@@ -119,30 +123,37 @@ def handle_user_message(message, user, callback):
             callback(user.inbox_print())
             user.set_state('online-inbox')
         elif message[:5] == '/load':
-            num = int(message.strip().split()[-1])
-            if user.chattee in user.inbox.keys():
-                message_list = user.inbox[user.chattee]
-                lst_messages = message_list[max(0, len(message_list) - num):]
-                ret = chat_guide(user.chattee)
-                for msg in lst_messages:
-                    if msg.sender != user.username:
-                        ret += '({}) {}\n'.format(msg.sender, msg.text)
-                        msg.read_unread = True
-                    else:
-                        ret += msg.text + '\n'
-                callback(ret)
-            else:
-                callback("No chat history to load!")
+            try:
+                num = int(message.strip().split()[-1])
+                if user.chattee in user.inbox.keys():
+                    message_list = user.inbox[user.chattee]
+                    lst_messages = message_list[max(0, len(message_list) - num):]
+                    ret = chat_guide(user.chattee)
+                    for msg in lst_messages:
+                        if msg.sender != user.username:
+                            ret += '({}) {}\n'.format(msg.sender, msg.text)
+                            msg.read_unread = True
+                        else:
+                            ret += msg.text + '\n'
+                    callback(ret)
+                else:
+                    callback("No chat history to load!")
+            except ValueError:
+                pass
         else:
             msg = Message(sender=user.username, receiver=user.chattee, text=message)
             user.inbox[user.chattee].append(msg)
-            # TODO: if the person is online and in the chat place then it should pop up for them and the message itself should be considered read
             chattee_user = User.all_user_pass[user.chattee]
-            if user.username not in chattee_user.inbox:
+            if user.username not in chattee_user.inbox.keys():
                 chattee_user.inbox[user.username] = []
             chattee_user.inbox[user.username].append(msg)
-
             User.save_users()
+
+            if chattee_user.current_state == 'online-direct' and \
+                    chattee_user.chattee == user.username:
+                msg.read_unread = True
+                chattee_user.send_message_to_user("({}) {}\n".format(user.username, msg.text))
+            user.send_message_to_user("{}\n".format(msg.text))
 
 
 def handler(message, id, callback):
