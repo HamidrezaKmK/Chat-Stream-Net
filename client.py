@@ -1,9 +1,10 @@
 from libtcp import build_client
 import os
+import clientstream
 
 def establish_UDP_connection(port, ip):
     print("established")
-    pass
+    clientstream.f()
 
 def on_message(message):
     message = message.split()
