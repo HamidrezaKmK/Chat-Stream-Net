@@ -1,11 +1,27 @@
 from libtcp import build_server
 import socket, cv2, pickle,struct,imutils
-import time
+import time, os
 
 client_watching = []
+movies_list = []
 
-main_menu = "Welcome to choghondar\n1. Teenage Mutant Ninja Turtles\n"
-path = ""
+directory = os.fsencode("videos")
+counter = 0
+
+main_menu = "Welcome to choghondar\n"
+for file in os.listdir(directory):
+    filename = os.fsdecode(file)
+    if filename.endswith(".mp4"):
+        counter = counter + 1
+        #print(counter, end = '. ')
+        #print(filename.replace('.mp4', ''))
+        main_menu = main_menu + str(counter) + '. ' + filename.replace('.mp4', '') + '\n'
+        movies_list.append(filename)
+    else:
+        continue
+
+#main_menu = "Welcome to choghondar\n1. Teenage Mutant Ninja Turtles\n"
+print(main_menu)
 
 def handler(message, id, callback):
     if message == "back":
@@ -20,8 +36,9 @@ def handler(message, id, callback):
         except ValueError:
             callback("not a number!")
         #client_watching.append(id)
-        if message == 1:
-            path = "TeenageMutantNinjaTurtles.mp4"
+        path = "videos/"
+        path = path + str(movies_list[message - 1])
+        print(path)
 
 
         # Socket Create
@@ -49,7 +66,7 @@ def handler(message, id, callback):
             client_socket,addr = server_socket.accept()
             print('GOT CONNECTION FROM:',addr)
             if client_socket:
-                vid = cv2.VideoCapture('TomandJerry.mp4')
+                vid = cv2.VideoCapture(path)
         
                 while(vid.isOpened()):
                     img,frame = vid.read()
