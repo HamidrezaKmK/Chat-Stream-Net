@@ -53,10 +53,6 @@ def handler(message, id, callback):
                     a = pickle.dumps(frame)
                     message = struct.pack("Q",len(a))+a
                     client_socket.sendall(message)
-            
-                    cv2.imshow('TRANSMITTING VIDEO',frame)
-                    if cv2.waitKey(1) == '13':
-                        client_socket.close()
 
     callback("$start_udp_and_play_video")
 

@@ -19,7 +19,10 @@ def get_stream(port, ip):
                 data += packet
             packed_msg_size = data[:payload_size]
             data = data[payload_size:]
-            msg_size = struct.unpack("Q", packed_msg_size)[0]
+            try:
+                msg_size = struct.unpack("Q", packed_msg_size)[0]
+            except:
+                break
 
             while len(data) < msg_size:
                 data += client_socket.recv(4 * 1024)
@@ -29,6 +32,7 @@ def get_stream(port, ip):
             cv2.imshow("RECEIVING VIDEO",frame)
             if cv2.waitKey(1) == '13':
                 break
+        cv2.destroyAllWindows()
         client_socket.close()
     except KeyboardInterrupt:
         client_socket.close()
