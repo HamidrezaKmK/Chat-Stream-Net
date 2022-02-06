@@ -8,6 +8,9 @@ main_menu = "Welcome to choghondar\n1. Teenage Mutant Ninja Turtles\n"
 path = ""
 
 def handler(message, id, callback):
+    if message == "back":
+        callback("$special_exit")
+        return
     if id in client_watching:
         if message == "/exit":
             client_watching.remove(id)
@@ -50,12 +53,17 @@ def handler(message, id, callback):
         
                 while(vid.isOpened()):
                     img,frame = vid.read()
-                    frame = imutils.resize(frame,width=320)
+                    try:
+                        frame = imutils.resize(frame,width=320)
+                    except:
+                        return
                     a = pickle.dumps(frame)
-                    time.sleep(0.1)
+                    time.sleep(0.05)
                     message = struct.pack("Q",len(a))+a
-                    client_socket.sendall(message)
-
+                    try:
+                        client_socket.sendall(message)
+                    except:
+                        return
     callback("$start_udp_and_play_video")
 
 build_server(handler, 10003, main_menu)

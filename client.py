@@ -42,3 +42,4 @@ tinp.start()
 while True:
     port, ip = q.get()
     establish_UDP_connection(port, ip, q)
+    send_message("back")
