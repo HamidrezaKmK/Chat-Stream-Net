@@ -6,11 +6,11 @@ import socket, threading, random
 
 q = Queue()
 
-def establish_UDP_connection(port, ip):
+def establish_UDP_connection(port, ip, q):
     print("established.")
     print(ip)
     print(port)
-    clientstream.get_stream(port, ip)
+    clientstream.get_stream(port, ip, q)
 
 def on_message(message):
     message_splitted = message.split()
@@ -31,11 +31,14 @@ send_message = build_client(on_message, on_exit, 10001)
 def inp():
     while True:
         message = input()
-        send_message(message)
+        if (message == 'q'):
+            q.put("exit")
+        else:
+            send_message(message)
 
 tinp = threading.Thread(target=inp)
 tinp.start()
 
 while True:
     port, ip = q.get()
-    establish_UDP_connection(port, ip)
+    establish_UDP_connection(port, ip, q)

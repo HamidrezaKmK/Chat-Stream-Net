@@ -1,5 +1,6 @@
 from libtcp import build_server
 import socket, cv2, pickle,struct,imutils
+import time
 
 client_watching = []
 
@@ -45,12 +46,13 @@ def handler(message, id, callback):
             client_socket,addr = server_socket.accept()
             print('GOT CONNECTION FROM:',addr)
             if client_socket:
-                vid = cv2.VideoCapture('TeenageMutantNinjaTurtles.mp4')
+                vid = cv2.VideoCapture('TomandJerry.mp4')
         
                 while(vid.isOpened()):
                     img,frame = vid.read()
                     frame = imutils.resize(frame,width=320)
                     a = pickle.dumps(frame)
+                    time.sleep(0.1)
                     message = struct.pack("Q",len(a))+a
                     client_socket.sendall(message)
 
